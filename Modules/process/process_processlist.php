@@ -840,7 +840,7 @@ class Process_ProcessList
         if ($value>$arg) $value = $arg;
         return $value;
     }
-    
+
     public function min_value_allowed($arg, $time, $value)
     {
         if ($value<$arg) $value = $arg;

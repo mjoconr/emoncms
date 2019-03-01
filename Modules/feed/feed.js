@@ -181,7 +181,37 @@ var feed = {
       data: apikeystr+"&id="+feedid,
       dataType: 'json',
       async: false,                      
-      success: function(data_in) { result = data_in; } 
+      success: function(data_in) { result = data_in; }
+    });
+    return result;
+  },
+
+  'checkdata':function(feedid,start,end,missing_data,max_value,min_value){
+    var result = {};
+    var missing_data = missing_data !== false ? '&missing_data=true' : '';
+    var max_value = max_value !== false ?  '&max_value=' + max_value : '';
+    var min_value = min_value !== false ?  '&min_value=' + min_value : '';
+    $.ajax({
+        url: path + "feed/checkdata.json?id=" + feedid + "&start=" + start + "&end=" + end + missing_data + max_value + min_value, 
+        async: false, 
+        success: function(data){
+            result = data;
+        } 
+    });
+    return result;
+  },
+
+  'fixdata':function(feedid,start,end,missing_data,max_value,min_value){
+    var result = {};
+    var missing_data = missing_data !== false ? '&missing_data=true' : '';
+    var max_value = max_value !== false ?  '&max_value=' + max_value : '';
+    var min_value = min_value !== false ?  '&min_value=' + min_value : '';
+    $.ajax({
+        url: path + "feed/fixdata.json?id=" + feedid + "&start=" + start + "&end=" + end + missing_data + max_value + min_value, 
+        async: false, 
+        success: function(data){
+            result = data;
+        }
     });
     return result;
   }
