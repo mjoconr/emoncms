@@ -260,7 +260,21 @@ function feed_controller()
                             return $feed->upload_variable_interval($feedid,get("npoints"));
                         }
                     }
-
+                    // Check dataset
+                    else if ($route->action == "checkdata") {
+                        // Start time and interval
+                        if (isset($_GET['end'])) {
+                            $result = $feed->check_data($feedid,get('start'),get('end'),get('max_value'),get('min_value'),get('missing_data'));
+                        }
+                    }
+                    // fix dataset
+                    else if ($route->action == "fixdata") {
+                        // Start time and interval
+                        if (isset($_GET['end'])) {
+                            $result = $feed->fix_data($feedid,get('start'),get('end'),get('max_value'),get('min_value'),get('missing_data'));
+                        }
+                    }
+                    
                     if ($f['engine']==Engine::MYSQL || $f['engine']==Engine::MYSQLMEMORY) {
                         if ($route->action == "deletedatapoint") return $feed->mysqltimeseries_delete_data_point($feedid,get('feedtime'));
                         else if ($route->action == "deletedatarange") return $feed->mysqltimeseries_delete_data_range($feedid,get('start'),get('end'));
