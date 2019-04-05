@@ -11,59 +11,7 @@
 */
 global $ltime,$path,$fullwidth,$emoncms_version,$theme,$themecolor,$favicon,$menu,$menucollapses;
 
-$v = 2;
-
-//compute dynamic @media properties depending on numbers and lengths of shortcuts
-// $maxwidth1=1200;
-// $maxwidth2=480;
-// $maxwidth3=340;
-// $sumlength1 = 0;
-// $sumlength2 = 0;
-// $sumlength3 = 0;
-// $sumlength4 = 0;
-// $sumlength5 = 0;
-// $nbshortcuts1 = 0;
-// $nbshortcuts2 = 0;
-// $nbshortcuts3 = 0;
-// $nbshortcuts4 = 0;
-// $nbshortcuts5 = 0;
-
-// foreach($menu['dashboard'] as $item){
-//     if(isset($item['name'])) $name = $item['name'];
-//     if(isset($item['published'])) $published = $item['published']; //only published dashboards
-//     if(isset($name) && $name && isset($published) && $published){
-//         $sumlength1 += strlen($name);
-//         $nbshortcuts1 ++;
-//     }
-// }
-// if(!empty($menu['left'])):foreach($menu['left'] as $item):
-//     if(isset($item['name'])) {$name = $item['name'];}
-//     $sumlength2 += strlen($name);
-//     $nbshortcuts2 ++;
-// endforeach; endif;
-
-// if(!empty($menu['dropdown']) && count($menu['dropdown']) && $session['read']){
-//     $extra['name'] = 'Extra';
-//     $sumlength3 = strlen($extra['name']);
-//     $nbshortcuts3 ++;
-// }
-// if (!empty($menu['dropdownconfig']) && count($menu['dropdownconfig'])){
-//     $setup['name'] = 'Setup';
-//     $sumlength4 = strlen($setup['name']);
-//     $nbshortcuts4 ++;
-// }
-// if(!empty($menu['right'])):foreach($menu['right'] as $item):
-//     if (isset($item['name'])){
-//         $name = $item['name'];
-//         $sumlength5 += strlen($name);
-//         $nbshortcuts5 ++;
-//     }
-// endforeach; endif;
-
-// $maxwidth1=intval((($sumlength1+$sumlength2+$sumlength3+$sumlength4+$sumlength5)+($nbshortcuts1+$nbshortcuts2+$nbshortcuts3+$nbshortcuts4+$nbshortcuts5+1)*6)*85/9);
-// $maxwidth2=intval(($nbshortcuts1+$nbshortcuts2+$nbshortcuts3+$nbshortcuts4+$nbshortcuts5+3)*6*75/9);
-// if($maxwidth2>$maxwidth1){$maxwidth2=$maxwidth1-1;}
-// if($maxwidth3>$maxwidth2){$maxwidth3=$maxwidth2-1;}
+$v = 3;
 
 if (!is_dir("Theme/".$theme)) {
     $theme = "basic";
@@ -103,7 +51,7 @@ if (!in_array($themecolor, ["blue", "sun", "standard"])) {
                     'EmonCMS Error',
                     '-------------',
                     'Message: ' + msg,
-                    'URL: ' + source,
+                    'Route: ' + source.replace('<?php echo $path; ?>',''),
                     'Line: ' + lineno,
                     'Column: ' + colno
                 ];
@@ -139,28 +87,18 @@ if (!in_array($themecolor, ["blue", "sun", "standard"])) {
             </div>
         </div>
 
-        <!-- open and close sidebar -->
-        <div id="sidebar-toggle-bar" title="<?php echo _("Toggle Sidebar") ?>" class="collapsed h-100 p-0 justify-content-center flex-column" data-toggle="slide-collapse" data-target="#sidebar"></div>
-        <!-- <span id="sidebar-overlay" class="collapsed menu-overlay" data-toggle="slide-collapse" data-target="#sidebar"></span> -->
-        <!-- end of open and close sidebar -->
-        
-        <?php if ($fullwidth && $route->controller=="dashboard") { ?>
-            <div>
-                <?php echo $content; ?>
-            </div>
-        <?php } else if ($fullwidth) { ?>
-            <div class="container-fluid">
-                <div class="row-fluid">
-                    <div class="span12">
-                        <?php echo $content; ?>
-                    </div>
-                </div>
-            </div>
-        <?php } else { ?>
-            <div class="container">
-                <?php echo $content; ?>
-            </div>
-        <?php } ?>
+        <?php
+        $contentContainerClasses[] = 'content-container';
+        if ($fullwidth && $route->controller=="dashboard") { 
+            $contentContainerClasses[] = '';
+        } else if ($fullwidth) { 
+            $contentContainerClasses[] = 'container-fluid';
+        } else { 
+            $contentContainerClasses[] = 'container';
+        }?>
+        <main class="<?php echo implode(' ',array_filter(array_unique($contentContainerClasses))) ?>">
+            <?php echo $content; ?>
+        </main>
         
     </div><!-- eof #wrap -->
 
@@ -170,60 +108,7 @@ if (!in_array($themecolor, ["blue", "sun", "standard"])) {
     </div>
 
     <script type="text/javascript" src="<?php echo $path; ?>Lib/bootstrap/js/bootstrap.js"></script>
-<?php if (isset($v) && $v === 2) { ?>
-    <script type="text/javascript" src="<?php echo $path; ?>Lib/hammer.min.js"></script>
-    <script>
-        // only use hammerjs on the relevent pages
-        // CSV list of pages in the navigation
-        var pages = ['feed/list','input/view'],
-        // strip off the domain/ip and just get the path
-        currentPage = (""+window.location).replace(path,''),
-        // find where in the list the current page is
-        currentIndex = pages.indexOf(currentPage)
-
-
-        // SETUP VARIABLES:
-        var hammerOptions = {
-            inputClass: Hammer.TouchInput // only works on devices with touch screens
-        }
-
-        // REMOVED THIS FUNCTIONALITY TEMPORARILY - need to implement a pager interface (eg next, first, last etc)
-
-        if (false && currentIndex > -1) {
-            // uses hammerjs to detect mobile gestures. navigates between input and feed view
-            
-            // allow text on page to be highlighted. 
-            delete Hammer.defaults.cssProps.userSelect
-
-            var container = document.getElementById('wrap'),
-                // get the path as reported by server
-                path = "<?php echo $path; ?>",
-                // create a new instance of the hammerjs api
-                mc = new Hammer.Manager(container, hammerOptions),
-                // make swipes require more velocity
-                swipe = new Hammer.Swipe({ velocity: 1.1, direction: Hammer.DIRECTION_HORIZONTAL }) // default velocity 0.3
-            
-            // enable the altered swipe gesture
-            mc.add([swipe]);
-
-            // CREATE EVENT LIST:
-            // add a callback function on the swipe gestures
-            mc.on("swipeleft swiperight", function(event) {              
-                    // increase or decrease the currentIndex
-                    index = event.type=='swipeleft' ? currentIndex+1 : currentIndex-1;
-                    // wrap back to start if beyond end
-                    index = index > pages.length-1 ? 0 : index
-                    // wrap forward to end if beyond start
-                    index = index < 0 ? pages.length-1 : index
-                    // get the page to load
-                    url = path+pages[index]
-                    // load the page
-                    window.location.href = url
-            });
-        }
-    </script>
-<?php } ?>
-<script type="text/javascript" src="<?php echo $path; ?>Lib/misc/sidebar.js"></script>
+    <script type="text/javascript" src="<?php echo $path; ?>Lib/misc/sidebar.js"></script>
 
 <!-- ICONS --------------------------------------------- -->
 <svg aria-hidden="true" style="position: absolute; width: 0; height: 0; overflow: hidden;" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
@@ -289,7 +174,7 @@ if (!in_array($themecolor, ["blue", "sun", "standard"])) {
         </symbol>
         <symbol id="icon-apps" viewBox="0 0 32 32">
             <!-- <title>apps</title> -->
-            <path d="m 5.1256556,0.32091057 c -1.5502497,0 -2.8314932,1.34817863 -2.8314932,2.89950673 V 29.111936 c 0,1.551328 1.2801643,2.900061 2.8314932,2.900061 H 19.554617 c 1.550249,0 2.832052,-1.348733 2.832052,-2.900061 V 3.2204173 c 0,-1.5513281 -1.280725,-2.89950673 -2.832052,-2.89950673 z m 0,4.31497453 H 19.554617 v 9.1634669 l -0.857976,-0.857421 -6.144658,6.917339 -3.4592268,-3.499366 -3.9671006,3.9671 z M 19.554617,14.571476 V 27.695353 H 5.1256556 v -4.76431 l 3.9671006,-3.967102 3.4592268,3.499366 z"></path>
+            <path d="m 6.8832443,0.32091057 c -1.5502497,0 -2.8314932,1.34817863 -2.8314932,2.89950673 V 29.111936 c 0,1.551328 1.2801643,2.900061 2.8314932,2.900061 H 21.312206 c 1.550249,0 2.832052,-1.348733 2.832052,-2.900061 V 3.2204173 c 0,-1.5513281 -1.280725,-2.89950673 -2.832052,-2.89950673 z m 0,4.31497453 H 21.312206 v 9.1634669 l -0.857976,-0.857421 -6.144658,6.917339 -3.459227,-3.499366 -3.9671007,3.9671 z M 21.312206,14.571476 V 27.695353 H 6.8832443 v -4.76431 l 3.9671007,-3.967102 3.459227,3.499366 z"></path>
         </symbol>
         <symbol id="icon-tasks" viewBox="0 0 32 32">
             <!-- <title>tasks</title> -->
@@ -342,6 +227,10 @@ if (!in_array($themecolor, ["blue", "sun", "standard"])) {
         <symbol id="icon-shuffle" viewBox="0 0 32 32">
             <!-- <title>shuffle</title> -->
             <path d="M24 22h-3.172l-5-5 5-5h3.172v5l7-7-7-7v5h-4c-0.53 0-1.039 0.211-1.414 0.586l-5.586 5.586-5.586-5.586c-0.375-0.375-0.884-0.586-1.414-0.586h-6v4h5.172l5 5-5 5h-5.172v4h6c0.53 0 1.039-0.211 1.414-0.586l5.586-5.586 5.586 5.586c0.375 0.375 0.884 0.586 1.414 0.586h4v5l7-7-7-7v5z"></path>
+        </symbol>
+        <symbol id="icon-arrow_back" viewBox="0 0 32 32">
+            <!-- <title>arrow_back</title> -->
+            <path d="M26.688 14.688v2.625h-16.25l7.438 7.5-1.875 1.875-10.688-10.688 10.688-10.688 1.875 1.875-7.438 7.5h16.25z"></path>
         </symbol>
     </defs>
 </svg>

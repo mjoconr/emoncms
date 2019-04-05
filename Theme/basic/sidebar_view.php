@@ -43,6 +43,7 @@ foreach($menu['sidebar'] as $menu_key => $sub_menu) {
         // create array of 2nd level navigation markup
         foreach($sub_menu as $second_level_item) {
             $path_controller = getPathController($second_level_item['path']);
+            settype($second_level_item['li_class'], 'array');
             $second_level_item['li_class'][] = 'collapse';
             if(!$third_level_open) {
                 $second_level_item['li_class'][] = 'in';
@@ -65,6 +66,10 @@ foreach($second_level_menus as $menu_key => $second_level_menu) {
                     // active 2nd level menu item (parent)
                     if ($route->controller === getPathController(getKeyValue('path', $item))) {
                         $item['li_class'][] = 'in';
+                        if( empty($item['title'])) $item['title'] = stripslashes($item['text']);
+                        $item['text'].='<span class="pull-right third-level-indicator">';
+                        $item['text'].='  <svg class="icon"><use xlink:href="#icon-arrow_back"></use></svg>';
+                        $item['text'].='</span>';
                     }
                 } else {
                     // all 2nd level items
@@ -80,11 +85,10 @@ foreach($second_level_menus as $menu_key => $second_level_menu) {
         $markup[] = implode(tab(5), $items);
     }
     $active_css = is_current_group($second_level_menu) ? ' active': '';
-    
+    $_close = _('Close');
     echo <<<SIDEBARSTART
-
     <div id="sidebar_{$menu_key}" class="sidebar-inner{$active_css}">
-        <a href="#" class="close btn btn-large btn-link pull-right" data-toggle="slide-collapse" data-target="#sidebar">&times;</a>
+        <a href="#" style="padding: .8em" class="btn btn-large btn-link pull-right btn-dark btn-inverse text-light" data-toggle="slide-collapse" data-target="#sidebar" title="{$_close}">&times;</a>
         <h4 id="sidebar-title">{$menu_key}</h4>
 
 SIDEBARSTART;

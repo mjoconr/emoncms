@@ -5,57 +5,50 @@ $(function(){
         var collapsed = this.classList.contains('collapsed');
         $btn = $(this);
         target = $btn.data('target');
+        $('[data-toggle="slide-collapse"][data-target="' + target + '"]').toggleClass('collapsed', collapsed);
         if (!collapsed) {
-            $('[data-toggle="slide-collapse"][data-target="' + target + '"]').addClass('collapsed');
             hide_sidebar();
         } else {
-            $('[data-toggle="slide-collapse"][data-target="' + target + '"]').removeClass('collapsed');
             show_sidebar();
         }
     });
-    
-    // trigger the events to allow module js scripts to attach actions to the events
-    function show_sidebar(options) {
-        // @note: assumes the css animation takes 300ms
-        $('#sidebar').trigger('show.sidebar.collapse');
-        setTimeout(function(){
-            $('#sidebar').trigger('shown.sidebar.collapse');
-        }, 350);
-        $('body').removeClass('collapsed').addClass('expanded');
-    }
-    function hide_sidebar(options) {
-        // @note: assumes the css animation takes 300ms
-        $('#sidebar').trigger('hide.sidebar.collapse');
-        setTimeout(function(){
-            $('#sidebar').trigger('hidden.sidebar.collapse');
-        }, 350);
-        $('body').addClass('collapsed').removeClass('expanded');
-    }
 
     // open sidebar if active page link clicked
     $('#left-nav li a').on('click', function(event){
         event.preventDefault();
-        // if the [data-sidebar] attribute has a selector that matches a menu, then show/hide it
-        $link = $(this);
-        $sidebar_inner = $($link.data('sidebar')); // (.sidebar_inner)
+        const $link = $(this);
+        const $sidebar_inner = $($link.data('sidebar')); // (.sidebar_inner)
+        const activeClass = 'active';
+
+        // show 2nd level - if on 3rd level
+        let secondlevel_menuitems = $('.sidebar-menu > li.collapse').length;
+        let open_secondlevel_menuitems = $('.sidebar-menu > li.collapse.in').length
+        let thirdLevelOpen = secondlevel_menuitems !== open_secondlevel_menuitems;
 
         // alter tab states
-        $link.parent().addClass('active').siblings().removeClass('active');
+        $link.parent().addClass(activeClass).siblings().removeClass(activeClass);
 
         // hide if not sidebar found
         if ($sidebar_inner.length == 0) {
             hide_sidebar();
         } else {
             if ($('body').hasClass('collapsed')) {
+                // closed sidebar
                 show_sidebar();
-                $sidebar_inner.addClass('active').siblings().removeClass('active')
+                $sidebar_inner.addClass(activeClass).siblings().removeClass(activeClass)
             } else {
-                if ($sidebar_inner.hasClass('active')) {
-                    // hide sidebar if clicked item already active
-                    hide_sidebar();
+                // already open sidebar
+                if ($sidebar_inner.hasClass(activeClass)) {
+                    // hide sidebar if clicked item already active and on 2nd level
+                    if(!thirdLevelOpen) {
+                        hide_sidebar();
+                    } else {
+                        $('.third-level-indicator').toggleClass('hidden', true);
+                        hideMenuItems(event);
+                    }
                 } else {
                     // enable correct sidebar inner based on clicked tab
-                    $sidebar_inner.addClass('active').siblings().removeClass('active');
+                    $sidebar_inner.addClass(activeClass).siblings().removeClass(activeClass);
                 }
             }
         }
@@ -136,11 +129,18 @@ $(function(){
             clicked = true;
         }
         let link = $('#menu-setup li.active a');
+        if (clicked) {
+            // hide the back arrow from active third level links - on click
+            $(event.target).parents('.nav').first().find('.active .third-level-indicator').toggleClass('hidden');
+        }
         let active_menu = link.parents('.sidebar-menu').first();
         if(active_menu.length !== 1) return; // no menu found
         
         let active_menu_name = active_menu.attr('id').split('-');
-        active_menu_name.shift(); 
+        active_menu_name.shift();
+        if(typeof path === 'undefined') {
+            var path = '';
+        }
         let relative_path = window.location.pathname.replace(path,''); // eg /emoncms/feed/list
         let controller = relative_path.replace('/emoncms/','').split('/')[0]; // eg. feed
         let include_id = [active_menu_name,controller,'sidebar','include'].join('-'); // eg. setup-feed-sidebar-include
@@ -161,26 +161,26 @@ $(function(){
     
 }); // end of jquery ready()
 
-// open / close sidebar based on swipe
-// disabled on devices with a mouse
-// @todo: test on more devices (emrys,2019-02-14)
-if(typeof Hammer !== 'undefined') {
-    var sidebarSwipeOptions = typeof hammerOptions !== 'undefined' ? hammerOptions:{};
-    var sidebar_switch = document.querySelector('#sidebar-toggle-bar');
-    var sidebar = document.querySelector('#sidebar');
 
-    if(sidebar_switch) {
-        var mc_switch = new Hammer(sidebar_switch, sidebarSwipeOptions);
-        mc_switch.on('swiperight', onSidebarSwipe);
-    }
-    if(sidebar) {
-        var mc_sidebar = new Hammer(sidebar, sidebarSwipeOptions);
-        mc_sidebar.on('swipeleft', onSidebarSwipe);
-    }
-    var onSidebarSwipe = function(event) {
-        // console.log('hammer js ' + event.type + ' event');
-        document.querySelector('#sidebar-toggle').click()
-    }
+    
+// trigger the events to allow module js scripts to attach actions to the events
+function show_sidebar(options) {
+    // @note: assumes the css animation takes 300ms
+    $('#sidebar').trigger('show.sidebar.collapse');
+    setTimeout(function(){
+        $('#sidebar').trigger('shown.sidebar.collapse');
+    }, 350);
+    $('body').removeClass('collapsed').addClass('expanded');
 }
+function hide_sidebar(options) {
+    // @note: assumes the css animation takes 300ms
+    $('#sidebar').trigger('hide.sidebar.collapse');
+    setTimeout(function(){
+        $('#sidebar').trigger('hidden.sidebar.collapse');
+    }, 350);
+    $('body').addClass('collapsed').removeClass('expanded');
+}
+
+
 // backward compatible empty function
 if(typeof init_sidebar !== 'function') var init_sidebar = function(){}
