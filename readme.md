@@ -67,6 +67,7 @@ The following API references apply to emoncms.org they differ slightly to the AP
 
 Recommended: 
 
+* [New: Debian build script](https://github.com/openenergymonitor/emonpi/tree/master/install)
 * [Ubuntu / Debian Linux via git](docs/LinuxInstall.md)
 * [Raspberry Pi](docs/RaspberryPi/readme.md)
   * [Pre built emonSD SD-card Image Download](https://github.com/openenergymonitor/emonpi/wiki/emonSD-pre-built-SD-card-Download-&-Change-Log)
@@ -102,6 +103,12 @@ Modules can be installed by downloading or git cloning into the emoncms/Modules 
 - [RemoteAccess Module](http://github.com/emoncms/remoteaccess-client) - Emoncms Remote Access client Beta
 
 There are many other modules such as the event module and openbem (open source building energy modelling module) that are available, check out the [Emoncms repo list](https://github.com/emoncms)
+
+**3rd party modules**
+
+- [CarbonCoop: ServiceAPI module](https://github.com/carboncoop/emonCMS_serviceapi)
+- [CarbonCoop: Auth0 module](https://github.com/carboncoop/emonCMS_auth0)
+
 
 ## Branches
 
